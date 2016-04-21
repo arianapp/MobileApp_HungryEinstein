@@ -394,45 +394,22 @@ main.factory('Authentication',
 
 		var ref = new Firebase(FIREBASE_URL);
 		var auth = $firebaseAuth(ref);
-		var temp_auth;		   
+		// var temp_auth;		   
         // successfully login and extract login user's infomation
 		auth.$onAuth(function(authUser){
 			if (authUser){
-				temp_auth = authUser;
+				// temp_auth = authUser;
 				var authRef = new Firebase(FIREBASE_URL + 'users/' + authUser.uid);
 				var userObj = $firebaseObject(authRef);
 				// $rootScope.messages =
 				
 				$rootScope.currentUser = userObj;
-
-
 			} else {
 				$rootScope.currentUser = '';
 			}
 		});
 		
 		return {
-			addRequest: function(){
-				$scope.message = "fail";
-
-				if (temp_auth){
-					$scope.message = "add successfully!";
-
-				}
-				var requestRef = new Firebase(FIREBASE_URL + 'users/' + 
-					temp_auth.uid + '/foods');
-
-				var foodinfo = $firebaseArray(requestRef);
-
-					foodinfo.$add({
-						name: $scope.requestfood,
-						date: Firebase.ServerValue.TIMESTAMP
-					}).then(function(){
-						$scope.requestfood = '';
-						$scope.message = "add successfully!";zz
-					}); 
-			},
-
 			logout: function(){
 				$rootScope.message = "successfully logout!";
 				supersonic.ui.initialView.show();
@@ -448,15 +425,22 @@ main.factory('Authentication',
 				then(function(){
 					//login successfully
 					// $rootScope.message = "welcome login in" + user.email;
+					// $rootScope.user.email = '';
+					// $rootScope.user.password = '';
 					var animation = supersonic.ui.animate("fade");
    					supersonic.ui.initialView.dismiss(animation);
 				}).catch(function(error){
 					$rootScope.message = error.message;
 				});
+
+				user.email = '';
+				user.password = '';
 				// $rootScope.message = "welcome" + user.email;
 			},  // login
 
 			register: function(user){
+				$rootScope.message = "go into register function";
+
 				auth.$createUser({
 					email: user.email,
 					password: user.password // pay attention to the"," or ";"
@@ -471,6 +455,7 @@ main.factory('Authentication',
 						regID: regUser.uid
 					}); //user info
 					// $window.location.href = 'home.html';
+					$rootScope.message = "register successfully";
 					supersonic.ui.initialView.show();
 				}).catch(function(error){
 					$rootScope.message = error.message;
@@ -478,89 +463,73 @@ main.factory('Authentication',
 			} //register
 		};  //return
 }]); //factory
- main.controller('home_controller',
-	['$scope', 'Authentication', '$firebaseObject', 'FIREBASE_URL', '$firebaseArray', 'supersonic',
-	function($scope, Authentication, $firebaseObject, FIREBASE_URL, $firebaseArray, supersonic){
+main.controller('home_controller',
+	['$scope','$rootScope', 'Authentication', '$firebaseObject', 'FIREBASE_URL', '$firebaseArray', '$firebaseAuth',
+	function($scope,$rootScope, Authentication, $firebaseObject, FIREBASE_URL, $firebaseArray, $firebaseAuth){
+	var ref = new Firebase(FIREBASE_URL);
+	var auth = $firebaseAuth(ref);
+    // successfully login and extract login user's infomation
 
-		var ref = new Firebase(FIREBASE_URL + 'users/');
-		// var syndata = $firebaseObject(ref);
-		// syndata.$bindTo($scope, "data");
 
-		$scope.messages = $firebaseArray(ref);
+	auth.$onAuth(function(authUser){
+		if (authUser){
+			var authRef = new Firebase(FIREBASE_URL + 'users/' + authUser.uid);
+			var userObj = $firebaseObject(authRef);
+			$rootScope.currentUser = userObj;  // get currentUserInfo
+
+	        var requestsRef = new Firebase(FIREBASE_URL + 'users/' +
+	          $rootScope.currentUser.$id + '/requests');
+	        var requestsInfo = $firebaseArray(requestsRef);
+            
+            // add request info with userID
+	        $scope.addRequest = function() {
+            // $scope.message = requestsInfo;
+
+            // add request under userID
+	          requestsInfo.$add({
+	            reqname: $scope.requester_name,
+	            subject: $scope.request_subject,
+	            food: $scope.food_provide,
+	            dateExp: $scope.request_expiry,
+	            date: Firebase.ServerValue.TIMESTAMP,
+	            accept: false
+	          }).then(function() {
+	            $scope.requester_name='';
+	            $scope.message = "add successfully";
+	          }); //promise
+              
+              // Create a new request/ to handle all requests
+              // add request under folder request with userID
+				var refRequest = new Firebase(FIREBASE_URL + 'requests')
+				.child(authUser.uid).set({
+		            name: $scope.requester_name,
+		            subject: $scope.request_subject,
+		            dateExp:$scope.request_expiry,
+		            date: Firebase.ServerValue.TIMESTAMP,
+		            accept: false,
+					regID: authUser.uid
+				}); //user info
+	        }; // addRequest
+	        $scope.logout = function(){
+				$scope.message = "successfully logout!";
+				supersonic.ui.initialView.show();
+				return auth.$unauth();
+	        }
+		} // userAuthenticated
+	});  // onAuth
+}]);
+
+main.controller('login_controller',
+	['$scope', 'Authentication', '$firebaseObject', 'FIREBASE_URL', '$firebaseArray',
+	function($scope, Authentication, $firebaseObject, FIREBASE_URL, $firebaseArray){
 
 		$scope.login = function() {
 			Authentication.login($scope.user);
-			
 		};
 		$scope.logout = function() {
 			Authentication.logout();
 		};
-		
 		$scope.register = function(){
 			Authentication.register($scope.user);
 		};
-
-		$scope.addRequest = function(){
-			Authentication.addRequest();
-		};
-
 }]);
-
-
-
-
-
- main.controller('request_controller',
-	['$scope', '$rootScope','$firebaseAuth', 'FIREBASE_URL', '$firebaseArray', '$firebaseObject', 'supersonic', 'Authentication',
-	function($scope, $rootScope, $firebaseAuth, $firebaseArray, FIREBASE_URL, $firebaseObject, supersonic, Authentication){
-		
-		var ref = new Firebase(FIREBASE_URL);
-		var auth = $firebaseAuth(ref);		   
-        // successfully login and extract login user's infomation
-		auth.$onAuth(function(authUser){
-			if (authUser){
-				var authRef = new Firebase(FIREBASE_URL + 'users/' + authUser.uid);
-				var userObj = $firebaseObject(authRef);
-				// $rootScope.messages =
-				
-				$rootScope.currentUser = userObj;
-
-			} else {
-				$rootScope.currentUser = '';
-			}
-		});
-
-		// $scope.currentUser = 'lalalla';
-		// var ref = new Firebase(FIREBASE_URL);
-		// var auth = $firebaseAuth(ref);
-		// auth.$onAuth(function(authUser){
-		// 	if (authUser){
-
-		// 	    var authRef = new Firebase(FIREBASE_URL + 'users/' + authUser.uid);
-		// 		var userObj = $firebaseObject(authRef);
-		// // 		// $rootScope.messages =
-				
-		// 		$rootScope.currentUser = userObj;  // user infomation
-  //    			// console.log('currentUser');
-
-		// 		// var requestRef = new Firebase(FIREBASE_URL + 'users/' + 
-		// 		// 	$rootScope.currentUser.$id + '/foods');
-
-		// 		// var foodinfo = $firebaseArray(requestRef);
-
-		// 		// $scope.addRequest = function(){
-		// 		// 	foodinfo.$add({
-		// 		// 		name: $scope.requestfood,
-		// 		// 		date: Firebase.ServerValue.TIMESTAMP
-		// 		// 	}).then(function(){
-		// 		// 		$scope.requestfood = '';
-		// 		// 	});
-		// 		// }; // 
-		// 	}  // authUser
-		// });
-	  // console.log("fail");
-}]);
-
-// main.controller('request_controller', ['$scope', function($scope){
-	
-// }]);

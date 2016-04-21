@@ -52,6 +52,7 @@
       </center>
     </div>
 
+     <!-- search input-->
     <div class = "item item-input item-stacked-label"> 
     	<div class="card">
     		<label class="item item-input">
@@ -60,8 +61,8 @@
     		</label>
     	</div>
     </div>
-  
 
+<!--     <!--Cards (still in sandbox at the moment) 
   <ul class="list" ng-hide="requestss.length == 0">
 
       <super-navigate location="requests#show" data-params-id="{{ requests.id }}" ng-repeat="requests in requestss | orderBy: artistOrder: direction | filter: query ">
@@ -75,29 +76,47 @@
     <h4 ng-show="requestss.length == 0" class="assertive padding">
       No requests found. Create one?
     </h4>
+ -->
+  message: {{message}}
+ <!-- *****showing all the list cards in 'cards/'-->
+  <ul>
+    <li ng-repeat = "card in all">{{card.subject}} for {{card.food}}</li>
+  </ul>
 
-    <super-modal-show location="requests#new">
-      <button class="button button-block button-positive">
-        Find a Tutor
-      </button>
-    </super-modal-show>
 
-    <super-modal-show location="requests#notify">
-      <button class="button button-full button-clear button-positive">
-      </button>
-    </super-modal-show>
+ <!-- show all the cards ariana has -->
+  <ul>
+    <li ng-repeat = "card in currentUserCard">{{card.subject}} for {{card.food}}</li>
+  </ul>
 
-  </div>
-    <!-- {{message}} -->
 
-    <!-- {{message}} logout information-->
-    <form class = "formgroup" name="requestform" ng-submit="addRequest()" novalidate>
-    	<div>
-	    	<input type="text" ng-required="true" placeholder="food" ng-model="requestfood">    		
-    	</div>
-    	<button type="submit" ng-disabled="requestform.$invalid">+</button>
-    </form>
-	
+    <div class ="col-md-5">
+      <h3> Add Request</h3>
+      <form ng-submit="addRequest()">
+        <div class ="form-group">
+          <label>Name</label>
+          <input type ="text" class ="form-control" ng-model="requester_name" placeholder="{{currentUser.firstname}}"></input>
+        </div>
+
+        <div class ="form-group">
+          <label>Subject</label>
+          <input type ="text" class ="form-control" ng-model="request_subject" placeholder="Subject you want to be tutored in"></input>
+        </div>
+
+        <div class ="form-group">
+          <label>Food provide</label>
+          <input type ="text" class ="form-control" ng-model="food_provide" placeholder="Chips"></input>
+        </div>
+
+        <div class ="form-group">
+          <label>Date of expiration</label>
+          <input type ="text" class ="form-control" ng-model="request_expiry" placeholder="Date of expiration"></input>
+        </div>
+
+        <button type ="submit" class ="button button-block button-positive">Find a Tutor</button>
+      </form>
+    </div>  <!--request form -->
+
 </div>
 
 
