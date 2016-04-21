@@ -14,14 +14,26 @@ main.controller('home_controller',
 
 	        var requestsRef = new Firebase(FIREBASE_URL + 'users/' +
 	          $rootScope.currentUser.$id + '/requests');
-	        var requestsInfo = $firebaseArray(requestsRef);
+	        var requestsInfoPersonal = $firebaseArray(requestsRef);
             
+	        // get all requests and connect to html
+            $scope.allRequests = requestsInfoPersonal;
+
+            requestsInfoPersonal.$watch(function(data){
+            	$rootScope.requestNumber = requestsInfoPersonal.length;
+            });
+
+
+            // request folder ----------------managing all requests 
+            var refRequest = new Firebase(FIREBASE_URL + 'requests/');
+            var requestsInfoAll = $firebaseArray(refRequest);
+
             // add request info with userID
 	        $scope.addRequest = function() {
-            // $scope.message = requestsInfo;
+            // $scope.message = requestsInfoPersonal;
 
             // add request under userID
-	          requestsInfo.$add({
+	          requestsInfoPersonal.$add({
 	            reqname: $scope.requester_name,
 	            subject: $scope.request_subject,
 	            food: $scope.food_provide,
@@ -30,26 +42,36 @@ main.controller('home_controller',
 	            accept: false
 	          }).then(function() {
 	            $scope.requester_name='';
+	            $scope.request_subject = '';
+	            $scope.food_provide = '';
+	            $scope.request_expiry ='';
 	            $scope.message = "add successfully";
 	          }); //promise
               
               // Create a new request/ to handle all requests
               // add request under folder request with userID
-				var refRequest = new Firebase(FIREBASE_URL + 'requests')
-				.child(authUser.uid).set({
+				// var refRequest = new Firebase(FIREBASE_URL + '/requests')
+				requestsInfoAll.$add({
 		            name: $scope.requester_name,
 		            subject: $scope.request_subject,
 		            dateExp:$scope.request_expiry,
+		            food: $scope.food_provide,
 		            date: Firebase.ServerValue.TIMESTAMP,
 		            accept: false,
 					regID: authUser.uid
 				}); //user info
 	        }; // addRequest
+
 	        $scope.logout = function(){
 				$scope.message = "successfully logout!";
 				supersonic.ui.initialView.show();
 				return auth.$unauth();
-	        }
+	        };
+
+	        $scope.deleteRequest = function(key) {
+	        	requestsInfoPersonal.$remove(key);
+	        }; // delete request
+
 		} // userAuthenticated
 	});  // onAuth
 }]);

@@ -45,12 +45,12 @@
 	  </super-navbar-button>
 	</super-navbar>
 
-	<div class="textintro">
+	<div class="textintro" ng-show="currentUser">
       <center>
         <h1 class = "padding-vertical" >Hi {{currentUser.firstname}}!</h1>
         <h2 class = "padding-vertical" >Here are the current listings: </h2>
       </center>
-    </div>
+  </div>
 
      <!-- search input-->
     <div class = "item item-input item-stacked-label"> 
@@ -77,11 +77,19 @@
       No requests found. Create one?
     </h4>
  -->
-  message: {{message}}
+  <!-- message: {{message}} -->
  <!-- *****showing all the list cards in 'cards/'-->
-  <ul>
-    <li ng-repeat = "card in all">{{card.subject}} for {{card.food}}</li>
-  </ul>
+  <div>
+    <span ng-show="requestNumber"> Requests Number is : {{requestNumber}}</span>
+  </div>
+  <div>
+    <ul>
+      <li ng-repeat = "(key, card) in allRequests">{{card.subject}} for {{card.food}} 
+        <button ng-click="deleteRequest(key)">delete</button>
+      </li>
+    </ul>
+  </div>
+
 
 
  <!-- show all the cards ariana has -->
